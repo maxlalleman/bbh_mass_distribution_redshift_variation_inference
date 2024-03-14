@@ -1,7 +1,10 @@
 import numpy as np
 from astropy.cosmology import Planck15
 import astropy.units as u
-from likelihoods import massModel_variation_all_m1
+try:
+    from likelihoods import massModel_variation_all_m1
+except ImportError:
+    from likelihoods import massModel_no_variation
 
 def reweighting_function_archi(m1,m2,a1,a2,cost1,cost2,z,dVdz):
 

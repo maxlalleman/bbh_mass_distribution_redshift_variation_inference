@@ -1,4 +1,4 @@
-# bbh_gwb_redshift_evolution
+# bbh_mass_distribution_redshift_variation_inference
 
 This repository contains the code and necessary material to reproduce the results of
 
