@@ -170,9 +170,18 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
     fig : matplotlib figure object
         Figure object to populate
     plot_data : dict
-        Dictionary containing data to plot; see above
+        A dictionary containing data to be plotted for the first dataset.
+        Each key represents a parameter column, and the corresponding value is a dictionary with the following keys:
+        - 'data': Posterior sample values for the parameter.
+        - 'plot_bounds': Tuple of (min, max) values to display on the plot for the parameter.
+        - 'label': A LaTeX string for axis labeling.
+    plot_data2 : dict
+        A dictionary containing data to be plotted for the second dataset.
+        Each key represents a parameter column, and the corresponding value is a dictionary with the same keys as 'plot_data'.
     color : str
-        Hexcode defining plot color
+        Hexcode defining the plot color for the first dataset.
+    color2 : str
+        Hexcode defining the plot color for the second dataset.
     hist_alpha : float
         Defines transparency of 1D histograms (optional; default 0.7)
     bins : int
