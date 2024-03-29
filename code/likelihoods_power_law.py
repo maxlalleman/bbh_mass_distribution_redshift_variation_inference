@@ -11,154 +11,11 @@ import numpy as np
 from custom_distributions import *
 from gwBackground import v, dEdf
 from constants import *
-#from gwBackground import *
+
 
 logit_std = 2.5
-tmp_max = 100.
 tmp_min = 2.
-ln_m1_grid = jnp.linspace(jnp.log(tmp_min),jnp.log(tmp_max),100)
-m1_grid = jnp.exp(ln_m1_grid)
-d_ln_m1 = ln_m1_grid[1] - ln_m1_grid[0]
 
-def truncatedNormal(samples,mu,sigma,lowCutoff,highCutoff):
-
-    """
-    Jax-enabled truncated normal distribution
-    
-    Parameters
-    ----------
-    samples : `jax.numpy.array` or float
-        Locations at which to evaluate probability density
-    mu : float
-        Mean of truncated normal
-    sigma : float
-        Standard deviation of truncated normal
-    lowCutoff : float
-        Lower truncation bound
-    highCutoff : float
-        Upper truncation bound
-
-    Returns
-    -------
-    ps : jax.numpy.array or float
-        Probability density at the locations of `samples`
-    """
-
-    a = (lowCutoff-mu)/jnp.sqrt(2*sigma**2)
-    b = (highCutoff-mu)/jnp.sqrt(2*sigma**2)
-    norm = jnp.sqrt(sigma**2*np.pi/2)*(-erf(a) + erf(b))
-    ps = jnp.exp(-(samples-mu)**2/(2.*sigma**2))/norm
-    return ps
-
-@jax.jit
-def sigmoid(low, delta, width, middle, zs):
-    return delta / (1 + jnp.exp(-(1/width)*(zs - middle))) + low
-
-@jax.jit
-def sigmoid_initial_final_no_delta(low, high, width, middle, zs):
-    return (high - low) / (1 + jnp.exp(-(1/width)*(zs - middle))) + low
-
-@jax.jit
-def merger_rate(alpha_z, beta_z, zp, zs):
-    return (1+zs)**alpha_z/(1+((1+zs)/(1+zp))**(alpha_z+beta_z))
-
-@jax.jit
-def massModel_variation_all_m1(m1, alpha_ref, delta_alpha, width_alpha, middle_alpha,
-                               mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak,
-                               mMax, high_mMax, width_mMax, middle_mMax,
-                               mMin, dmMax, high_dmMax, width_dm, middle_dm, dmMin, zs):
-
-    """
-    Baseline primary mass model, described as a mixture between a power law
-    and gaussian, with exponential tapering functions at high and low masses
-
-    Parameters
-    ----------
-    m1 : array or float
-        Primary masses at which to evaluate probability densities
-    alpha : float
-        Power-law index
-    mu_m1 : float
-        Location of possible Gaussian peak
-    sig_m1 : float
-        Stanard deviation of possible Gaussian peak
-    f_peak : float
-        Approximate fraction of events contained within Gaussian peak (not exact due to tapering)
-    mMax : float
-        Location at which high-mass tapering begins
-    mMin : float
-        Location at which low-mass tapering begins
-    dmMax : float
-        Scale width of high-mass tapering function
-    dmMin : float
-        Scale width of low-mass tapering function
-
-    Returns
-    -------
-    p_m1s : jax.numpy.array
-        Unnormalized array of probability densities
-    """
-    alpha_new = sigmoid(alpha_ref, delta_alpha, width_alpha, middle_alpha, zs)
-    p_m1_pl = (1.+alpha_new)*m1**(alpha_new)/(tmp_max**(1.+alpha_new) - tmp_min**(1.+alpha_new))
-
-    p_m1_peak = jnp.exp(-(m1-mu_m1)**2/(2.*sig_m1**2))/jnp.sqrt(2.*np.pi*sig_m1**2)
-    
-    new_mMax = sigmoid_initial_final_no_delta(mMax, high_mMax, width_mMax, middle_mMax, zs)
-    # sigmoid(mMax, delta_mMax, width_mMax, middle_mMax, zs)
-    new_dmMax = sigmoid_initial_final_no_delta(dmMax, high_dmMax, width_dm, middle_dm, zs)
-
-    # Compute low- and high-mass filters
-    low_filter = jnp.exp(-(m1-mMin)**2/(2.*dmMin**2))
-    low_filter = jnp.where(m1<mMin,low_filter,1.)
-    high_filter = jnp.exp(-(m1-new_mMax)**2/(2.*new_dmMax**2))
-    high_filter = jnp.where(m1>new_mMax,high_filter,1.)
-
-    new_f_peak = sigmoid_initial_final_no_delta(log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak, zs)
-    actual_f_peak = 10.**(new_f_peak)
-    combined_p = jnp.array((actual_f_peak*p_m1_peak + (1. - actual_f_peak)*p_m1_pl)*low_filter*high_filter)
-    return combined_p #(f_peak*p_m1_peak + (1.-f_peak)*p_m1_pl)*low_filter*high_filter
-
-def get_value_from_logit(logit_x,x_min,x_max):
-    exp_logit = jnp.exp(logit_x)
-    x = (exp_logit*x_max + x_min)/(1.+exp_logit)
-    dlogit_dx = 1./(x-x_min) + 1./(x_max-x)
-    return x,dlogit_dx
-
-def cumsum(total,new_element):
-    phi,w = new_element
-    total = phi*total+w
-    return total,total
-
-##################################################
-#######            Pre-computing           #######
-##################################################
-
-N = 20000
-
-m1s_drawn = np.random.uniform(tmp_min, tmp_max, size=N)
-
-c_m2s = np.random.uniform(size=int(N))
-m2s_drawn = tmp_min**(1.)+c_m2s*(m1s_drawn**(1.)-tmp_min**(1.))
-    
-zs_drawn = np.random.uniform(0,4,size=N) # changed 10 to 4
-
-# Computing dEdfs
-freqs = stochasticDict['freqs']
-
-dEdfs = np.array([dEdf(m1s_drawn[ii]+m2s_drawn[ii],freqs*(1+zs_drawn[ii]),eta=m2s_drawn[ii]/m1s_drawn[ii]/(1+m2s_drawn[ii]/m1s_drawn[ii])**2) for ii in range(N)])
-
-p_m1_old = 1/(tmp_max-tmp_min)*np.ones(N)
-p_z_old = 1/(4-0)*np.ones(N) # changed 10 to 4
-p_m2_old = 1/(m1s_drawn-tmp_min)
-
-
-##################################################
-#######            Likelihoods             #######
-##################################################
-all_zs = np.linspace(0,4,400) # Should be 1000, just took it 10 for testing
-# omg = OmegaGW_BBH(2.1,100.,all_zs)
-
-# Note: mMin was 2, but this caused issues with tmp_min
 
 def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     """
@@ -275,7 +132,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     # Normalization
     alpha_for_norm = alpha_ref
-    p_m1_norm = massModel_variation_all_m1(jnp.array([20]), alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+    p_m1_norm = massModel_variation_all_m1_power_law(jnp.array([20]), alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
                                            10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, jnp.array([0.2]))
@@ -294,7 +151,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     p_draw = injectionDict['p_draw_m1m2z']*injectionDict['p_draw_a1a2cost1cost2']
 
     # Compute proposed population weights
-    p_m1_det =  massModel_variation_all_m1(m1_det,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+    p_m1_det =  massModel_variation_all_m1_power_law(m1_det,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
                                            10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, z_det)/p_m1_norm
@@ -331,7 +188,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
         # Compute proposed population weights
         
-        p_m1 =  massModel_variation_all_m1(m1_sample,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+        p_m1 =  massModel_variation_all_m1_power_law(m1_sample,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
                                            10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, z_sample)/p_m1_norm
