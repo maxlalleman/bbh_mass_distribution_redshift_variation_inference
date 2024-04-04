@@ -251,6 +251,10 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
         ax.grid(True,dashes=(1,3))
         ax.set_xlim(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1])
         ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data2[key]['data'])),fontsize=labelsize + 5)
+        
+        if i == 0:
+            ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
+            ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
 
         # Turn off tick labels if this isn't the first dimension
         if i!=0:
