@@ -96,17 +96,22 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
        
         # Plot the marginal 1D posterior (i.e. top of a corner plot column)
         ax = fig.add_subplot(ndim,ndim,int(1+(ndim+1)*i))
+        ax.set_rasterization_zorder(2)
         
         ax.hist(plot_data[key]['data'],bins=np.linspace(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],bins),\
-               rasterized=True,color=color,alpha=hist_alpha,density=True,zorder=0)
+               color=color,alpha=hist_alpha,density=True,zorder=0)
         ax.hist(plot_data[key]['data'],bins=np.linspace(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],bins),\
-                histtype='step',color='black',density=True,zorder=2)
+                histtype='step',color='black',density=True,zorder=1)
         x = np.linspace(-100, 100, 100000)
         pdf_values = np.exp(priors[key].log_prob(x))
         ax.plot(x, pdf_values, '--', lw = 1.6, color = 'darkblue')
         ax.grid(True,dashes=(1,3))
         ax.set_xlim(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1])
         ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data[key]['data'])),fontsize=labelsize + 5)
+        
+        if i == 0:
+            ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
+            ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
 
         # Turn off tick labels if this isn't the first dimension
         if i!=0:
@@ -115,6 +120,8 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         # If this is the last dimension add an x-axis label
         if i==ndim-1:
             ax.set_xlabel(plot_data[key]['label'],fontsize=labelsize)
+            ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
+            ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
             
         # If not the last dimension, loop across other variables and fill in the rest of the column with 2D plots
         else:
@@ -124,9 +131,10 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
                 
                 # Make a 2D density plot
                 ax = fig.add_subplot(ndim,ndim,int(1+(ndim+1)*i + (j+1)*ndim))
+                ax.set_rasterization_zorder(2)
                 
                 ax.hexbin(plot_data[key]['data'],plot_data[k]['data'],cmap=cmap,mincnt=1,gridsize=bins,bins=hexscale,\
-                         rasterized=True,extent=(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],plot_data[k]['plot_bounds'][0],plot_data[k]['plot_bounds'][1]),
+                         extent=(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],plot_data[k]['plot_bounds'][0],plot_data[k]['plot_bounds'][1]),
                          linewidths=(0,),zorder=0,vmax=vmax)
                 
                 # Set plot bounds
@@ -137,12 +145,16 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
                 # If still in the first column, add a y-axis label
                 if i==0:
                     ax.set_ylabel(plot_data[k]['label'],fontsize=labelsize)
+                    ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
+                    ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
                 else:
                     ax.set_yticklabels([])
                
                 # If on the last row, add an x-axis label
                 if j==ndim-i-2:
                     ax.set_xlabel(plot_data[key]['label'],fontsize=labelsize)
+                    ax.tick_params(axis='both', which='major', labelsize= labelsize - 1)
+                    ax.tick_params(axis='both', which='minor', labelsize= labelsize - 1)
                 else:
                     ax.set_xticklabels([])
                     
@@ -226,15 +238,16 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
        
         # Plot the marginal 1D posterior (i.e. top of a corner plot column)
         ax = fig.add_subplot(ndim,ndim,int(1+(ndim+1)*i))
+        ax.set_rasterization_zorder(2)
         
         ax.hist(plot_data[key]['data'],bins=np.linspace(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],bins),\
-               rasterized=True,color=color,alpha=hist_alpha,density=True,zorder=0)
+               color=color,alpha=hist_alpha,density=True,zorder=0)
         ax.hist(plot_data[key]['data'],bins=np.linspace(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],bins),\
-                histtype='step',color='black',density=True,zorder=2)
+                histtype='step',color='black',density=True,zorder=1)
         ax.hist(plot_data2[key]['data'],bins=np.linspace(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1],bins),\
-               rasterized=True,color=color2,alpha=hist_alpha,density=True,zorder=0)
+               color=color2,alpha=hist_alpha,density=True,zorder=0)
         ax.hist(plot_data2[key]['data'],bins=np.linspace(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1],bins),\
-                histtype='step',color='black',density=True,zorder=2)
+                histtype='step',color='black',density=True,zorder=1)
         ax.grid(True,dashes=(1,3))
         ax.set_xlim(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1])
         ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data2[key]['data'])),fontsize=labelsize + 5)
@@ -246,6 +259,8 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
         # If this is the last dimension add an x-axis label
         if i==ndim-1:
             ax.set_xlabel(plot_data2[key]['label'],fontsize=labelsize)
+            ax.tick_params(axis='both', which='major', labelsize= labelsize - 1)
+            ax.tick_params(axis='both', which='minor', labelsize= labelsize - 1)
             
         # If not the last dimension, loop across other variables and fill in the rest of the column with 2D plots
         else:
@@ -255,12 +270,13 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
                 
                 # Make a 2D density plot
                 ax = fig.add_subplot(ndim,ndim,int(1+(ndim+1)*i + (j+1)*ndim))
+                ax.set_rasterization_zorder(2)
                 
                 ax.hexbin(plot_data[key]['data'],plot_data[k]['data'],cmap=cmap,mincnt=1,gridsize=bins,bins=hexscale,\
-                         rasterized=True,extent=(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],plot_data[k]['plot_bounds'][0],plot_data[k]['plot_bounds'][1]),
+                         extent=(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],plot_data[k]['plot_bounds'][0],plot_data[k]['plot_bounds'][1]),
                          linewidths=(0,),zorder=0,vmax=vmax)
                 ax.hexbin(plot_data2[key]['data'],plot_data2[k]['data'],cmap=cmap2,mincnt=1,gridsize=bins,bins=hexscale,\
-                         rasterized=True,extent=(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1],plot_data2[k]['plot_bounds'][0],plot_data2[k]['plot_bounds'][1]),
+                         extent=(plot_data2[key]['plot_bounds'][0],plot_data2[key]['plot_bounds'][1],plot_data2[k]['plot_bounds'][0],plot_data2[k]['plot_bounds'][1]),
                          linewidths=(0,),zorder=0,vmax=vmax)
                 
                 # Set plot bounds
@@ -271,12 +287,16 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
                 # If still in the first column, add a y-axis label
                 if i==0:
                     ax.set_ylabel(plot_data2[k]['label'],fontsize=labelsize)
+                    ax.tick_params(axis='both', which='major', labelsize= labelsize - 1)
+                    ax.tick_params(axis='both', which='minor', labelsize= labelsize - 1)
                 else:
                     ax.set_yticklabels([])
                
                 # If on the last row, add an x-axis label
                 if j==ndim-i-2:
                     ax.set_xlabel(plot_data2[key]['label'],fontsize=labelsize)
+                    ax.tick_params(axis='both', which='major', labelsize= labelsize - 1)
+                    ax.tick_params(axis='both', which='minor', labelsize= labelsize - 1)
                 else:
                     ax.set_xticklabels([])
                     
