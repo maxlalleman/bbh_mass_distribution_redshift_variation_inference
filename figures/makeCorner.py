@@ -107,11 +107,11 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         ax.plot(x, pdf_values, '--', lw = 1.6, color = 'darkblue')
         ax.grid(True,dashes=(1,3))
         ax.set_xlim(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1])
-        ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data[key]['data'])),fontsize=labelsize + 5)
+        ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data[key]['data'])),fontsize=labelsize)
         
         if i == 0:
-            ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
-            ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
+            ax.tick_params(axis='both', which='major', labelsize=labelsize)
+            ax.tick_params(axis='both', which='minor', labelsize=labelsize)
 
         # Turn off tick labels if this isn't the first dimension
         if i!=0:
@@ -120,8 +120,8 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         # If this is the last dimension add an x-axis label
         if i==ndim-1:
             ax.set_xlabel(plot_data[key]['label'],fontsize=labelsize)
-            ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
-            ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
+            ax.tick_params(axis='both', which='major', labelsize=labelsize)
+            ax.tick_params(axis='both', which='minor', labelsize=labelsize)
             
         # If not the last dimension, loop across other variables and fill in the rest of the column with 2D plots
         else:
@@ -145,16 +145,16 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
                 # If still in the first column, add a y-axis label
                 if i==0:
                     ax.set_ylabel(plot_data[k]['label'],fontsize=labelsize)
-                    ax.tick_params(axis='both', which='major', labelsize=labelsize - 1)
-                    ax.tick_params(axis='both', which='minor', labelsize=labelsize - 1)
+                    ax.tick_params(axis='both', which='major', labelsize=labelsize)
+                    ax.tick_params(axis='both', which='minor', labelsize=labelsize)
                 else:
                     ax.set_yticklabels([])
                
                 # If on the last row, add an x-axis label
                 if j==ndim-i-2:
                     ax.set_xlabel(plot_data[key]['label'],fontsize=labelsize)
-                    ax.tick_params(axis='both', which='major', labelsize= labelsize - 1)
-                    ax.tick_params(axis='both', which='minor', labelsize= labelsize - 1)
+                    ax.tick_params(axis='both', which='major', labelsize= labelsize)
+                    ax.tick_params(axis='both', which='minor', labelsize= labelsize)
                 else:
                     ax.set_xticklabels([])
                     
