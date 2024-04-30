@@ -217,7 +217,7 @@ def plot_corner_2(fig,plot_data,plot_data2,color,color2,hist_alpha=0.7,bins=20,l
         hexscale=None
 
     # Define a linear color map
-    color_dict = {"mediumblue": "lavender", "red": "pink", "black":"gray"}
+    color_dict = {"mediumblue": "lavender", "red": "pink", "black":"gray", "#33a02c": "lavender", "#1f78b4": "springgreen"}
     if color not in color_dict and color2 not in color_dict:
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["white",color])
         cmap2 = matplotlib.colors.LinearSegmentedColormap.from_list("", ["white",color2])
