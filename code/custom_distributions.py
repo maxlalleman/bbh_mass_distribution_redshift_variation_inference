@@ -1,6 +1,12 @@
 import jax
 import jax.numpy as jnp
+from jax.scipy.special import erf
+import numpy as np
 
+
+logit_std = 2.5
+tmp_min = 2.
+tmp_max = 100.
 
 def truncatedNormal(samples,mu,sigma,lowCutoff,highCutoff):
 
@@ -117,7 +123,7 @@ def merger_rate(alpha_z, beta_z, zp, zs):
 
 
 @jax.jit
-def massModel_variation_all_m1_peak(m1, alpha_ref, mu_m1, delta_mu, width_mu, middle_mu,
+def massModel_variation_all_m1_peak(m1, alpha_ref, mu_m1, high_mu, width_mu, middle_mu,
                                sig_m1, high_sig, width_sig, middle_sig,
                                log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak,
                                mMax, mMin, dmMax, dmMin, zs):
@@ -175,7 +181,7 @@ def massModel_variation_all_m1_peak(m1, alpha_ref, mu_m1, delta_mu, width_mu, mi
 
     p_m1_pl = (1.+alpha_ref)*m1**(alpha_ref)/(tmp_max**(1.+alpha_ref) - tmp_min**(1.+alpha_ref))
 
-    new_mu_m1 = sigmoid(mu_m1, delta_mu, width_mu, middle_mu, zs)
+    new_mu_m1 = sigmoid_initial_final_no_delta(mu_m1, high_mu, width_mu, middle_mu, zs)
     new_sig_m1 = sigmoid_initial_final_no_delta(sig_m1, high_sig, width_sig, middle_sig, zs)
 
     p_m1_peak = jnp.exp(-(m1-new_mu_m1)**2/(2.*new_sig_m1**2))/jnp.sqrt(2.*np.pi*new_sig_m1**2)
@@ -194,10 +200,12 @@ def massModel_variation_all_m1_peak(m1, alpha_ref, mu_m1, delta_mu, width_mu, mi
 
 
 @jax.jit
-def massModel_variation_all_m1_power_law(m1, alpha_ref, delta_alpha, width_alpha, middle_alpha,
+def massModel_variation_all_m1_power_law(m1, alpha_ref, high_alpha, width_alpha, middle_alpha,
                                mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak,
                                mMax, high_mMax, width_mMax, middle_mMax,
-                               mMin, dmMax, high_dmMax, width_dm, middle_dm, dmMin, zs):
+                               mMin, high_mMin, width_mMin, middle_mMin,
+                               dmMax, high_dmMax, width_dmMax, middle_dmMax,
+                               dmMin, high_dmMin, width_dmMin, middle_dmMin, zs):
 
     """
     Baseline primary mass model, described as a mixture between a power law
@@ -229,17 +237,19 @@ def massModel_variation_all_m1_power_law(m1, alpha_ref, delta_alpha, width_alpha
     p_m1s : jax.numpy.array
         Unnormalized array of probability densities
     """
-    alpha_new = sigmoid(alpha_ref, delta_alpha, width_alpha, middle_alpha, zs)
+    alpha_new = sigmoid_initial_final_no_delta(alpha_ref, high_alpha, width_alpha, middle_alpha, zs)
     p_m1_pl = (1.+alpha_new)*m1**(alpha_new)/(tmp_max**(1.+alpha_new) - tmp_min**(1.+alpha_new))
 
     p_m1_peak = jnp.exp(-(m1-mu_m1)**2/(2.*sig_m1**2))/jnp.sqrt(2.*np.pi*sig_m1**2)
     
     new_mMax = sigmoid_initial_final_no_delta(mMax, high_mMax, width_mMax, middle_mMax, zs)
-    new_dmMax = sigmoid_initial_final_no_delta(dmMax, high_dmMax, width_dm, middle_dm, zs)
+    new_dmMax = sigmoid_initial_final_no_delta(dmMax, high_dmMax, width_dmMax, middle_dmMax, zs)
+    new_mMin = sigmoid_initial_final_no_delta(mMin, high_mMin, width_mMin, middle_mMin, zs)
+    new_dmMin = sigmoid_initial_final_no_delta(dmMin, high_dmMin, width_dmMin, middle_dmMin, zs)
 
     # Compute low- and high-mass filters
-    low_filter = jnp.exp(-(m1-mMin)**2/(2.*dmMin**2))
-    low_filter = jnp.where(m1<mMin,low_filter,1.)
+    low_filter = jnp.exp(-(m1-new_mMin)**2/(2.*new_dmMin**2))
+    low_filter = jnp.where(m1<new_mMin,low_filter,1.)
     high_filter = jnp.exp(-(m1-new_mMax)**2/(2.*new_dmMax**2))
     high_filter = jnp.where(m1>new_mMax,high_filter,1.)
 
@@ -296,7 +306,7 @@ def massModel_no_variation(m1, alpha_ref, mu_m1, sig_m1, f_peak, mMax, mMin, dmM
     return combined_p
 
 
-def merger_rate_zp_sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha_z,
+def merger_rate_zp_sigmoid(alpha_z, high_alpha_z, width_alpha_z, middle_m_alpha_z,
                            beta_z, high_beta_z, width_beta_z, middle_m_beta_z,
                            low_zp, high_zp, width_m, m_middle, masses, z_s):
     """
@@ -337,7 +347,7 @@ def merger_rate_zp_sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha
         Merger rate calculated using the sigmoidal function.
     """
     new_zp = sigmoid_initial_final_no_delta(low_zp, high_zp, width_m, m_middle, masses)
-    new_alpha = sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha_z, masses)
+    new_alpha = sigmoid_initial_final_no_delta(alpha_z, high_alpha_z, width_alpha_z, middle_m_alpha_z, masses)
     new_beta = sigmoid_initial_final_no_delta(beta_z, high_beta_z, width_beta_z, middle_m_beta_z, masses)
     return (1+z_s)**new_alpha/(1+((1+z_s)/(1+new_zp))**(new_alpha+new_beta))
 

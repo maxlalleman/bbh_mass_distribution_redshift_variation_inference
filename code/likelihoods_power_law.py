@@ -15,7 +15,7 @@ from constants import *
 
 logit_std = 2.5
 tmp_min = 2.
-
+tmp_max = 100.
 
 def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     """
@@ -44,13 +44,19 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     logR20 = numpyro.sample("logR20",dist.Uniform(-2,1))
     alpha_ref = numpyro.sample("alpha_ref",dist.Normal(-2,3))
-    delta_alpha = numpyro.sample("delta_alpha", dist.Normal(0, 1))
+    high_alpha = numpyro.sample("high_alpha", dist.Normal(-2, 3))
     log_width_alpha = numpyro.sample("log_width_alpha", dist.Uniform(-1, 1))
     width_alpha = numpyro.deterministic("width_alpha", 10.**log_width_alpha)
-    middle_z_alpha = numpyro.sample("middle_z_alpha", dist.Uniform(0,4))
+    middle_z_alpha = numpyro.sample("middle_z_alpha", dist.Uniform(0,0.8))
 
-    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(20,50))
+    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(15,60))
     mMin = numpyro.sample("mMin",dist.Uniform(5,15))
+    
+    high_mMin = numpyro.sample("high_mMin", dist.Uniform(5,15))
+    # delta_mMax = numpyro.sample("delta_mMax", dist.Normal(0, 5))
+    log_width_mMin = numpyro.sample("log_width_mMin", dist.Uniform(-1, 1))
+    width_mMin = numpyro.deterministic("width_mMin", 10.**log_width_mMin)
+    middle_z_mMin = numpyro.sample("middle_z_mMin", dist.Uniform(0,0.8))
 
     bq = numpyro.sample("bq",dist.Normal(0,3))
 
@@ -71,14 +77,14 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     # log_f_peak = numpyro.sample("log_f_peak",TransformedUniform(-3.,0.))
     logit_log_f_peak = numpyro.sample("logit_log_f_peak",dist.Normal(0,logit_std))
-    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-5. ,0.) # -5 was -3
+    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-6. ,0.) # -6 was -5 was -3
     numpyro.deterministic("log_f_peak",log_f_peak)
     numpyro.factor("p_log_f_peak",logit_log_f_peak**2/(2.*logit_std**2)-jnp.log(jac_log_f_peak))
 
-    log_high_f_peak = numpyro.sample("log_high_f_peak", dist.Uniform(-5, 0))
+    log_high_f_peak = numpyro.sample("log_high_f_peak", dist.Uniform(-6, 0))
     log_width_f_peak = numpyro.sample("log_width_f_peak", dist.Uniform(-1, 1))
     width_f_peak = numpyro.deterministic("width_f_peak", 10.**log_width_f_peak)
-    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,4))
+    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,0.8))
 
     # mMax = numpyro.sample("mMax",TransformedUniform(50.,100.))
     logit_mMax = numpyro.sample("logit_mMax",dist.Normal(0,logit_std))
@@ -90,13 +96,18 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     # delta_mMax = numpyro.sample("delta_mMax", dist.Normal(0, 5))
     log_width_mMax = numpyro.sample("log_width_mMax", dist.Uniform(-1, 1))
     width_mMax = numpyro.deterministic("width_mMax", 10.**log_width_mMax)
-    middle_z_mMax = numpyro.sample("middle_z_mMax", dist.Uniform(0,4))
+    middle_z_mMax = numpyro.sample("middle_z_mMax", dist.Uniform(0,0.8))
 
     # log_dmMin = numpyro.sample("log_dmMin",TransformedUniform(-1.,0.5))
     logit_log_dmMin = numpyro.sample("logit_log_dmMin",dist.Normal(0,logit_std))
     log_dmMin,jac_log_dmMin = get_value_from_logit(logit_log_dmMin, -1. ,0.5)
     numpyro.deterministic("log_dmMin",log_dmMin)
     numpyro.factor("p_log_dmMin",logit_log_dmMin**2/(2.*logit_std**2)-jnp.log(jac_log_dmMin))
+    
+    log_high_dmMin = numpyro.sample("log_high_dmMin", dist.Uniform(-1, 0.5))
+    log_width_dmMin = numpyro.sample('log_width_dmMin', dist.Uniform(-1, 1))
+    width_dmMin = numpyro.deterministic("width_dmMin", 10.**log_width_dmMin)
+    middle_z_dmMin = numpyro.sample("middle_z_dmMin", dist.Uniform(0, 0.8))
 
     # log_dmMax = numpyro.sample("log_dmMax",TransformedUniform(0.5,1.5))
     logit_log_dmMax = numpyro.sample("logit_log_dmMax",dist.Normal(0,logit_std))
@@ -105,9 +116,9 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     numpyro.factor("p_log_dmMax",logit_log_dmMax**2/(2.*logit_std**2)-jnp.log(jac_log_dmMax))
 
     log_high_dmMax = numpyro.sample("log_high_dmMax", dist.Uniform(0.5, 1.5))
-    log_width_dm = numpyro.sample('log_width_dm', dist.Uniform(-1, 1))
-    width_dm = numpyro.deterministic("width_dm", 10.**log_width_dm)
-    middle_z_dm = numpyro.sample("middle_z_dm", dist.Uniform(0, 4))
+    log_width_dmMax = numpyro.sample('log_width_dmMax', dist.Uniform(-1, 1))
+    width_dmMax = numpyro.deterministic("width_dmMax", 10.**log_width_dmMax)
+    middle_z_dmMax = numpyro.sample("middle_z_dmMax", dist.Uniform(0, 0.8))
 
     # mu_chi = numpyro.sample("mu_chi",TransformedUniform(0.,1.))
     logit_mu_chi = numpyro.sample("logit_mu_chi",dist.Normal(0,logit_std))
@@ -132,10 +143,12 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     # Normalization
     alpha_for_norm = alpha_ref
-    p_m1_norm = massModel_variation_all_m1_power_law(jnp.array([20]), alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+    p_m1_norm = massModel_variation_all_m1_power_law(jnp.array([20]), alpha_ref, high_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
-                                           mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
-                                           10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, jnp.array([0.2]))
+                                           mMax, high_mMax, width_mMax, middle_z_mMax, 
+                                           mMin, high_mMin, width_mMin, middle_z_mMin,
+                                           10.**log_dmMax, 10.**log_high_dmMax, width_dmMax, middle_z_dmMax, 
+                                                     10.**log_dmMin, 10.**log_high_dmMin, width_dmMin, middle_z_dmMin, jnp.array([0.2]))
     p_z_norm = merger_rate(alpha_z, beta_z, zp, 0.2)
 
     # Read out found injections
@@ -151,10 +164,12 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     p_draw = injectionDict['p_draw_m1m2z']*injectionDict['p_draw_a1a2cost1cost2']
 
     # Compute proposed population weights
-    p_m1_det =  massModel_variation_all_m1_power_law(m1_det,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+    p_m1_det =  massModel_variation_all_m1_power_law(m1_det, alpha_ref, high_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
-                                           mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
-                                           10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, z_det)/p_m1_norm
+                                           mMax, high_mMax, width_mMax, middle_z_mMax, 
+                                           mMin, high_mMin, width_mMin, middle_z_mMin,
+                                           10.**log_dmMax, 10.**log_high_dmMax, width_dmMax, middle_z_dmMax, 
+                                                     10.**log_dmMin, 10.**log_high_dmMin, width_dmMin, middle_z_dmMin, z_det)/p_m1_norm
     p_m2_det = (1.+bq)*m2_det**bq/(m1_det**(1.+bq)-tmp_min**(1.+bq))
     p_a1_det = truncatedNormal(a1_det,mu_chi,10.**logsig_chi,0,1)
     p_a2_det = truncatedNormal(a2_det,mu_chi,10.**logsig_chi,0,1)
@@ -188,10 +203,12 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
         # Compute proposed population weights
         
-        p_m1 =  massModel_variation_all_m1_power_law(m1_sample,  alpha_ref, delta_alpha, width_alpha, middle_z_alpha,
+        p_m1 =  massModel_variation_all_m1_power_law(m1_sample, alpha_ref, high_alpha, width_alpha, middle_z_alpha,
                                            mu_m1, sig_m1, log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
-                                           mMax, high_mMax, width_mMax, middle_z_mMax, mMin,
-                                           10.**log_dmMax, 10.**log_high_dmMax, width_dm, middle_z_dm, 10.**log_dmMin, z_sample)/p_m1_norm
+                                           mMax, high_mMax, width_mMax, middle_z_mMax, 
+                                           mMin, high_mMin, width_mMin, middle_z_mMin,
+                                           10.**log_dmMax, 10.**log_high_dmMax, width_dmMax, middle_z_dmMax, 
+                                                     10.**log_dmMin, 10.**log_high_dmMin, width_dmMin, middle_z_dmMin, z_sample)/p_m1_norm
         p_m2 = (1.+bq)*m2_sample**bq/(m1_sample**(1.+bq)-tmp_min**(1.+bq))
         p_a1 = truncatedNormal(a1_sample,mu_chi,10.**logsig_chi,0,1)
         p_a2 = truncatedNormal(a2_sample,mu_chi,10.**logsig_chi,0,1)

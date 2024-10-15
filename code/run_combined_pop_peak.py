@@ -10,7 +10,7 @@ import arviz as az
 from jax.config import config
 config.update("jax_enable_x64", True)
 
-from likelihoods import combined_pop_gwb_cbc_redshift_mass
+from likelihoods_peak import combined_pop_gwb_cbc_redshift_mass
 from getData import *
 from get_cosmo import *
 from scipy.io import loadmat
@@ -31,5 +31,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-save_path = "../data/RUNS/my_results.cdf"
+save_path = "../data/RUNS/peak_run_no_delta_middle_z_until_0dot08.cdf"
 az.to_netcdf(data, save_path)

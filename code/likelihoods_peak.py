@@ -45,11 +45,14 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     logR20 = numpyro.sample("logR20",dist.Uniform(-2,1))
     alpha_ref = numpyro.sample("alpha_ref",dist.Normal(-2,3))
 
-    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(20,50))    
-    delta_mu = numpyro.sample("delta_mu", dist.Normal(0, 5))
+    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(15,60))    
+    high_mu = numpyro.sample("high_mu",dist.Uniform(15,60))   
+    # delta_mu = numpyro.sample("delta_mu", dist.Normal(0, 5)),
+    # we got rid of delta, using only high and low for all parameters.
     log_width_mu = numpyro.sample("log_width_mu", dist.Uniform(-1, 1))
     width_mu = numpyro.deterministic("width_mu", 10.**log_width_mu)
-    middle_z_mu = numpyro.sample("middle_z_mu", dist.Uniform(0,4))
+    middle_z_mu = numpyro.sample("middle_z_mu", dist.Uniform(0,0.8)) # used to be 0 to 4, change on 6/9/2024 before running anything,
+    # same for all other middle_z
     
     mMin = numpyro.sample("mMin",dist.Uniform(5,15))
 
@@ -69,17 +72,17 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     high_sig = numpyro.sample("high_sig", dist.Uniform(1.5, 15))
     log_width_sig = numpyro.sample("log_width_sig", dist.Uniform(-1, 1))
     width_sig = numpyro.deterministic("width_sig", 10.**log_width_sig)
-    middle_z_sig = numpyro.sample("middle_z_sig", dist.Uniform(0,4))
+    middle_z_sig = numpyro.sample("middle_z_sig", dist.Uniform(0,0.8)) # was 4
 
     logit_log_f_peak = numpyro.sample("logit_log_f_peak",dist.Normal(0,logit_std))
-    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-5. ,0.)
+    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-6. ,0.) # changed from -5 to -6
     numpyro.deterministic("log_f_peak",log_f_peak)
     numpyro.factor("p_log_f_peak",logit_log_f_peak**2/(2.*logit_std**2)-jnp.log(jac_log_f_peak))
     
-    log_high_f_peak = numpyro.sample("log_high_f_peak", dist.Uniform(-5, 0))
+    log_high_f_peak = numpyro.sample("log_high_f_peak", dist.Uniform(-6, 0))
     log_width_f_peak = numpyro.sample("log_width_f_peak", dist.Uniform(-1, 1))
     width_f_peak = numpyro.deterministic("width_f_peak", 10.**log_width_f_peak)
-    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,4))
+    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,0.8)) # was 4
 
     logit_mMax = numpyro.sample("logit_mMax",dist.Normal(0,logit_std))
     mMax,jac_mMax = get_value_from_logit(logit_mMax,50. ,100.)
@@ -116,7 +119,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     # Normalization
     alpha_for_norm = alpha_ref
-    p_m1_norm = massModel_variation_all_m1_peak(jnp.array([20]), alpha_ref, mu_m1, delta_mu, width_mu, middle_z_mu, 
+    p_m1_norm = massModel_variation_all_m1_peak(jnp.array([20]), alpha_ref, mu_m1, high_mu, width_mu, middle_z_mu, 
                                            sig_m1, high_sig, width_sig, middle_z_sig,
                                            log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, mMin, 10.**log_dmMax,10.**log_dmMin, jnp.array([0.2]))
@@ -135,7 +138,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     p_draw = injectionDict['p_draw_m1m2z']*injectionDict['p_draw_a1a2cost1cost2']
 
     # Compute proposed population weights
-    p_m1_det =  massModel_variation_all_m1_peak(m1_det,  alpha_ref, mu_m1, delta_mu, width_mu, middle_z_mu, 
+    p_m1_det =  massModel_variation_all_m1_peak(m1_det,  alpha_ref, mu_m1, high_mu, width_mu, middle_z_mu, 
                                            sig_m1, high_sig, width_sig, middle_z_sig,
                                            log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, mMin, 10.**log_dmMax,10.**log_dmMin, z_det)/p_m1_norm
@@ -172,7 +175,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
         # Compute proposed population weights
         
-        p_m1 =  massModel_variation_all_m1_peak(m1_sample,  alpha_ref, mu_m1, delta_mu, width_mu, middle_z_mu, 
+        p_m1 =  massModel_variation_all_m1_peak(m1_sample,  alpha_ref, mu_m1, high_mu, width_mu, middle_z_mu, 
                                            sig_m1, high_sig, width_sig, middle_z_sig,
                                            log_f_peak, log_high_f_peak, width_f_peak, middle_z_f_peak,
                                            mMax, mMin, 10.**log_dmMax,10.**log_dmMin, z_sample)/p_m1_norm

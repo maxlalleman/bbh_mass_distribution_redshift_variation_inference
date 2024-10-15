@@ -45,7 +45,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     logR20 = numpyro.sample("logR20",dist.Uniform(-2,1))
     alpha_ref = numpyro.sample("alpha_ref",dist.Normal(-2,3))
 
-    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(20,50))
+    mu_m1 = numpyro.sample("mu_m1",dist.Uniform(15,60))
     
     mMin = numpyro.sample("mMin",dist.Uniform(5,15))
 
@@ -54,22 +54,46 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     R20 = numpyro.deterministic("R20",10.**logR20)
 
     alpha_z = numpyro.sample("alpha_z",dist.Normal(0,4))
-    delta_alpha_z = numpyro.sample("delta_alpha_z", dist.Normal(0,1))
+    high_alpha_z = numpyro.sample("high_alpha_z", dist.Normal(0,4))
     log_width_alpha_z = numpyro.sample("log_width_alpha_z", dist.Uniform(-1, 1))
+    # logit_width_alpha_z = numpyro.sample("logit_log_width_alpha_z",dist.Normal(0,logit_std))
+    # log_width_alpha_z,jac_log_width_alpha_z = get_value_from_logit(logit_width_alpha_z,-1. ,1.)
+    # numpyro.deterministic("log_width_alpha_z",log_width_alpha_z)
+    # numpyro.factor("p_log_width_alpha_z",logit_width_alpha_z**2/(2.*logit_std**2)-jnp.log(jac_log_width_alpha_z))
     width_alpha_z = numpyro.deterministic("width_alpha_z", 10.**log_width_alpha_z)
-    middle_m_alpha_z = numpyro.sample("middle_m_alpha_z", dist.Uniform(30, 75))
+    # middle_m_alpha_z = numpyro.sample("middle_m_alpha_z", dist.Uniform(20, 90))
+    logit_middle_m_alpha_z = numpyro.sample("logit_middle_m_alpha_z",dist.Normal(0,logit_std))
+    middle_m_alpha_z,jac_middle_m_alpha_z = get_value_from_logit(logit_middle_m_alpha_z,20. ,75.)
+    numpyro.deterministic("middle_m_alpha_z",middle_m_alpha_z)
+    numpyro.factor("p_middle_m_alpha_z",logit_middle_m_alpha_z**2/(2.*logit_std**2)-jnp.log(jac_middle_m_alpha_z))
     
     beta_z = numpyro.sample("beta_z",dist.Uniform(0,10))
     high_beta_z = numpyro.sample("high_beta_z", dist.Uniform(0,10))
     log_width_beta_z = numpyro.sample("log_width_beta_z", dist.Uniform(-1, 1))
+    # logit_width_beta_z = numpyro.sample("logit_log_width_beta_z",dist.Normal(0,logit_std))
+    # log_width_beta_z,jac_log_width_beta_z = get_value_from_logit(logit_width_beta_z,-1. ,1.)
+    # numpyro.deterministic("log_width_beta_z",log_width_beta_z)
+    # numpyro.factor("p_log_width_beta_z",logit_width_beta_z**2/(2.*logit_std**2)-jnp.log(jac_log_width_beta_z))
     width_beta_z = numpyro.deterministic("width_beta_z", 10.**log_width_beta_z)
-    middle_m_beta_z = numpyro.sample("middle_m_beta_z", dist.Uniform(30, 75))
+    # middle_m_beta_z = numpyro.sample("middle_m_beta_z", dist.Uniform(20, 90))
+    logit_middle_m_beta_z = numpyro.sample("logit_middle_m_beta_z",dist.Normal(0,logit_std))
+    middle_m_beta_z,jac_middle_m_beta_z = get_value_from_logit(logit_middle_m_beta_z,20. ,75.)
+    numpyro.deterministic("middle_m_beta_z",middle_m_beta_z)
+    numpyro.factor("p_middle_m_beta_z",logit_middle_m_beta_z**2/(2.*logit_std**2)-jnp.log(jac_middle_m_beta_z))
 
     low_zp = numpyro.sample("low_zp", dist.Uniform(0.2, 4)) 
     high_zp = numpyro.sample("high_zp", dist.Uniform(0.2, 4))
-    log_width_zp = numpyro.sample("log_width_zp", dist.Uniform(-1, 1)) 
+    log_width_zp = numpyro.sample("log_width_zp", dist.Uniform(-1, 1))
+    # logit_width_zp = numpyro.sample("logit_log_width_zp",dist.Normal(0,logit_std))
+    # log_width_zp,jac_log_width_zp = get_value_from_logit(logit_width_zp,-1. ,1.)
+    # numpyro.deterministic("log_width_zp",log_width_zp)
+    # numpyro.factor("p_log_width_zp",logit_width_zp**2/(2.*logit_std**2)-jnp.log(jac_log_width_zp))
     width_zp = numpyro.deterministic("width_zp", 10.**log_width_zp)
-    middle_m = numpyro.sample("middle_m", dist.Uniform(30, 75))
+    # middle_m_zp = numpyro.sample("middle_m_zp", dist.Uniform(20, 90))
+    logit_middle_m_zp = numpyro.sample("logit_middle_m_zp",dist.Normal(0,logit_std))
+    middle_m_zp,jac_middle_m_zp = get_value_from_logit(logit_middle_m_zp,20. ,75.)
+    numpyro.deterministic("middle_m_zp",middle_m_zp)
+    numpyro.factor("p_middle_m_zp",logit_middle_m_zp**2/(2.*logit_std**2)-jnp.log(jac_middle_m_zp))
 
     logit_sig_m1 = numpyro.sample("logit_sig_m1",dist.Normal(0,logit_std))
     sig_m1,jac_sig_m1 = get_value_from_logit(logit_sig_m1,1.5 ,15.)
@@ -77,7 +101,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     numpyro.factor("p_sig_m1",logit_sig_m1**2/(2.*logit_std**2)-jnp.log(jac_sig_m1))
 
     logit_log_f_peak = numpyro.sample("logit_log_f_peak",dist.Normal(0,logit_std))
-    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-5. ,0.)
+    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-6. ,0.)
     numpyro.deterministic("log_f_peak",log_f_peak)
     numpyro.factor("p_log_f_peak",logit_log_f_peak**2/(2.*logit_std**2)-jnp.log(jac_log_f_peak))
     f_peak= numpyro.deterministic("f_peak",10.**log_f_peak)
@@ -118,9 +142,9 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     # Normalization
     alpha_for_norm = alpha_ref
     p_m1_norm = massModel_no_variation(20.,alpha_for_norm,mu_m1,sig_m1,10.**log_f_peak,mMax,mMin,10.**log_dmMax,10.**log_dmMin)
-    p_z_norm = merger_rate_zp_sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha_z,
+    p_z_norm = merger_rate_zp_sigmoid(alpha_z, high_alpha_z, width_alpha_z, middle_m_alpha_z,
                            beta_z, high_beta_z, width_beta_z, middle_m_beta_z,
-                           low_zp, high_zp, width_zp, middle_m, 20., 0.2)
+                           low_zp, high_zp, width_zp, middle_m_zp, 20., 0.2)
 
     # Read out found injections
     # Note that `pop_reweight` is the inverse of the draw weights for each event
@@ -142,9 +166,9 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     p_cost1_det = truncatedNormal(cost1_det,mu_cost,sig_cost,-1,1)
     p_cost2_det = truncatedNormal(cost2_det,mu_cost,sig_cost,-1,1)
 
-    rate_det = merger_rate_zp_sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha_z,
+    rate_det = merger_rate_zp_sigmoid(alpha_z, high_alpha_z, width_alpha_z, middle_m_alpha_z,
                            beta_z, high_beta_z, width_beta_z, middle_m_beta_z,
-                           low_zp, high_zp, width_zp, middle_m, m1_det, z_det)
+                           low_zp, high_zp, width_zp, middle_m_zp, m1_det, z_det)
 
     p_z_det = dVdz_det/(1.+z_det)*rate_det/p_z_norm 
     R_pop_det = R20*p_m1_det*p_m2_det*p_z_det*p_a1_det*p_a2_det*p_cost1_det*p_cost2_det
@@ -179,9 +203,9 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
         p_cost1 = truncatedNormal(cost1_sample,mu_cost,sig_cost,-1,1)
         p_cost2 = truncatedNormal(cost2_sample,mu_cost,sig_cost,-1,1)
 
-        rate = merger_rate_zp_sigmoid(alpha_z, delta_alpha_z, width_alpha_z, middle_m_alpha_z,
+        rate = merger_rate_zp_sigmoid(alpha_z, high_alpha_z, width_alpha_z, middle_m_alpha_z,
                            beta_z, high_beta_z, width_beta_z, middle_m_beta_z,
-                           low_zp, high_zp, width_zp, middle_m, m1_sample, z_sample)
+                           low_zp, high_zp, width_zp, middle_m_zp, m1_sample, z_sample)
         #merger_rate_varied_zp(alpha_z, beta_z, zp, dzp_dm, m1_sample, z_sample)
         p_z = dVdz_sample/(1.+z_sample)*rate/p_z_norm
         R_pop = R20*p_m1*p_m2*p_z*p_a1*p_a2*p_cost1*p_cost2
