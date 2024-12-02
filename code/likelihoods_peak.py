@@ -46,9 +46,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     alpha_ref = numpyro.sample("alpha_ref",dist.Normal(-2,3))
 
     mu_m1 = numpyro.sample("mu_m1",dist.Uniform(15,60))    
-    high_mu = numpyro.sample("high_mu",dist.Uniform(15,60))   
-    # delta_mu = numpyro.sample("delta_mu", dist.Normal(0, 5)),
-    # we got rid of delta, using only high and low for all parameters.
+    high_mu = numpyro.sample("high_mu",dist.Uniform(15,60))
     log_width_mu = numpyro.sample("log_width_mu", dist.Uniform(-1, 1))
     width_mu = numpyro.deterministic("width_mu", 10.**log_width_mu)
     middle_z_mu = numpyro.sample("middle_z_mu", dist.Uniform(0,0.8)) # used to be 0 to 4, change on 6/9/2024 before running anything,

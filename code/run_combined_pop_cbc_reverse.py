@@ -10,7 +10,7 @@ import arviz as az
 from jax.config import config
 config.update("jax_enable_x64", True)
 
-from likelihoods import combined_pop_gwb_cbc_redshift_mass
+from likelihoods_reverse import combined_pop_gwb_cbc_redshift_mass
 from getData import *
 from get_cosmo import *
 from scipy.io import loadmat
@@ -20,18 +20,20 @@ injectionDict = getInjections(reweight=False)
 sampleDict = getSamples(sample_limit=2000,reweight=False)
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(combined_pop_gwb_cbc_redshift_mass) #, target_accept_prob=0.95)
+kernel = NUTS(combined_pop_gwb_cbc_redshift_mass) # , dense_mass =[("alpha_z", "high_alpha_z", "log_width_alpha_z", "logit_middle_m_alpha_z",
+                         # "beta_z", "high_beta_z", "log_width_beta_z", "logit_middle_m_beta_z",
+                         # "low_zp", "high_zp", "log_width_zp", "logit_middle_m_zp")]) #, target_accept_prob=0.95)
 #Try to increase warmup stage steps to avoid divergences later on
 mcmc = MCMC(kernel,num_warmup=2000,num_samples=3000,num_chains=1)
 
 # Choose a random key and run over our model
-rng_key = random.PRNGKey(118)
+rng_key = random.PRNGKey(110) # seed was 118
 rng_key,rng_key_ = random.split(rng_key)
 mcmc.run(rng_key_,sampleDict,injectionDict)
 mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-save_path = "../data/RUNS/my_reverse_sector_results.cdf"
+save_path = "../data/RUNS/my_reverse_sector_logit_for_middle_z_until_75_from_20_seed_110.cdf"
 az.to_netcdf(data, save_path)
 

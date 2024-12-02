@@ -374,3 +374,67 @@ def get_value_from_logit(logit_x,x_min,x_max):
     x = (exp_logit*x_max + x_min)/(1.+exp_logit)
     dlogit_dx = 1./(x-x_min) + 1./(x_max-x)
     return x,dlogit_dx
+
+@jax.jit
+def massModel_variation_all_varied(m1, alpha_ref, high_alpha, width_alpha, middle_alpha,
+                               mu_m1, high_mu, width_mu, middle_mu,
+                               sig_m1, high_sig, width_sig, middle_sig,
+                               log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak,
+                               mMax, high_mMax, width_mMax, middle_mMax,
+                               mMin, high_mMin, width_mMin, middle_mMin,
+                               dmMax, high_dmMax, width_dmMax, middle_dmMax,
+                               dmMin, high_dmMin, width_dmMin, middle_dmMin, zs):
+
+    """
+    Baseline primary mass model, described as a mixture between a power law
+    and gaussian, with exponential tapering functions at high and low masses
+
+    Parameters
+    ----------
+    m1 : array or float
+        Primary masses at which to evaluate probability densities
+    alpha : float
+        Power-law index
+    mu_m1 : float
+        Location of possible Gaussian peak
+    sig_m1 : float
+        Stanard deviation of possible Gaussian peak
+    f_peak : float
+        Approximate fraction of events contained within Gaussian peak (not exact due to tapering)
+    mMax : float
+        Location at which high-mass tapering begins
+    mMin : float
+        Location at which low-mass tapering begins
+    dmMax : float
+        Scale width of high-mass tapering function
+    dmMin : float
+        Scale width of low-mass tapering function
+
+    Returns
+    -------
+    p_m1s : jax.numpy.array
+        Unnormalized array of probability densities
+    """
+    alpha_new = sigmoid_initial_final_no_delta(alpha_ref, high_alpha, width_alpha, middle_alpha, zs)
+    p_m1_pl = (1.+alpha_new)*m1**(alpha_new)/(tmp_max**(1.+alpha_new) - tmp_min**(1.+alpha_new))
+    
+    new_mu_m1 = sigmoid_initial_final_no_delta(mu_m1, high_mu, width_mu, middle_mu, zs)
+    new_sig_m1 = sigmoid_initial_final_no_delta(sig_m1, high_sig, width_sig, middle_sig, zs)
+
+    p_m1_peak = jnp.exp(-(m1-new_mu_m1)**2/(2.*new_sig_m1**2))/jnp.sqrt(2.*np.pi*new_sig_m1**2)
+    
+    new_mMax = sigmoid_initial_final_no_delta(mMax, high_mMax, width_mMax, middle_mMax, zs)
+    new_dmMax = sigmoid_initial_final_no_delta(dmMax, high_dmMax, width_dmMax, middle_dmMax, zs)
+    new_mMin = sigmoid_initial_final_no_delta(mMin, high_mMin, width_mMin, middle_mMin, zs)
+    new_dmMin = sigmoid_initial_final_no_delta(dmMin, high_dmMin, width_dmMin, middle_dmMin, zs)
+
+    # Compute low- and high-mass filters
+    low_filter = jnp.exp(-(m1-new_mMin)**2/(2.*new_dmMin**2))
+    low_filter = jnp.where(m1<new_mMin,low_filter,1.)
+    high_filter = jnp.exp(-(m1-new_mMax)**2/(2.*new_dmMax**2))
+    high_filter = jnp.where(m1>new_mMax,high_filter,1.)
+
+    new_f_peak = sigmoid_initial_final_no_delta(log_f_peak, log_high_f_peak, width_f_peak, middle_f_peak, zs)
+    actual_f_peak = 10.**(new_f_peak)
+    combined_p = jnp.array((actual_f_peak*p_m1_peak + (1. - actual_f_peak)*p_m1_pl)*low_filter*high_filter)
+    return combined_p
