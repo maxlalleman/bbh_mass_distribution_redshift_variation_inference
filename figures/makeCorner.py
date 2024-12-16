@@ -75,6 +75,8 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         If true, a logarithmic color scale is adopted for 2D posteriors (optional; default False)
     vmax : None or float
         User-specified maximum for 2D colorscale (optional; default None)
+    priors : None or dict
+        User-specified prior distributions used in the inference (optional; default None)
 
     Returns
     -------
