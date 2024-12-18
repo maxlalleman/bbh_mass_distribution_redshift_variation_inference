@@ -9,7 +9,6 @@ from scipy.io import loadmat
 import numpy as np
 
 from custom_distributions import *
-from gwBackground import v, dEdf
 from constants import *
 
 

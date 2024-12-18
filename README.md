@@ -2,11 +2,11 @@
 
 This repository contains the code and necessary material to reproduce the results of
 
-"**Titel paper**"
+"**No evidence that the binary black hole mass distribution evolves with redshift**"
 
 In this paper, we infer the variation in redshift of the binary black hole mass distribution from gravitational-wave (GW) data, using individual binary black hole mergers. 
 We consider the GW events from LIGO-Virgo-KAGRA's third observing run. We discuss the variation in redshift of the mass distribution in three different sectors.
-The peak sector, containing all parameters relevant to the peak part of the mass distribution, the power-law sector where the parameters of the power-law sector are varied, and the third 'reverse' sector, where we vary the redshift dependent part of the merger rate with mass. This last one can be seen as the opposite analysis, but gives the same results.
+The peak sector, containing all parameters relevant to the peak part of the mass distribution, the power-law sector where the parameters of the power-law sector are varied, and the third sector, where we flip the dependencies and vary the redshift dependent part of the merger rate with mass where we also find no variation.
 
 The data can be downloaded from Zenodo . A pre-print of the paper can be found .
 
