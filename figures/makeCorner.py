@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.random as npr
 import matplotlib.colors
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -106,8 +107,15 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         ax.hist(plot_data[key]['data'],bins=np.linspace(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1],bins),\
                 histtype='step',color='black',density=True,zorder=1)
         x = np.linspace(-100, 100, 100000)
-        pdf_values = np.exp(priors[key].log_prob(x))
-        ax.plot(x, pdf_values, '--', lw = 1.6, color = 'darkblue')
+        if "delta" in key and not "alpha" in key:
+            my_generator = np.random.default_rng()
+            pdf_values = np.log10(my_generator.triangular(priors[key][0], priors[key][2], priors[key][1], size = np.size(x)))
+            ax.axvline(x = priors[key][0], linestyle = 'dashed', color = 'darkblue')
+            ax.axvline(x = priors[key][1], linestyle = 'dashed', color = 'darkblue')
+            ax.axvline(x = priors[key][2], linestyle = 'dashdot', color = 'darkblue')
+        else:
+            pdf_values = np.exp(priors[key].log_prob(x))
+            ax.plot(x, pdf_values, '--', lw = 1.6, color = 'darkblue')
         ax.grid(True,dashes=(1,3))
         ax.set_xlim(plot_data[key]['plot_bounds'][0],plot_data[key]['plot_bounds'][1])
         ax.set_title(r"${0:.2f}^{{+{1:.2f}}}_{{-{2:.2f}}}$".format(*getBounds(plot_data[key]['data'])),fontsize=labelsize)
