@@ -109,10 +109,7 @@ def plot_corner(fig,plot_data,color,hist_alpha=0.7,bins=20,labelsize=14,logscale
         x = np.linspace(-100, 100, 100000)
         if "delta" in key and not "alpha" in key:
             my_generator = np.random.default_rng()
-            pdf_values = np.log10(my_generator.triangular(priors[key][0], priors[key][2], priors[key][1], size = np.size(x)))
-            ax.axvline(x = priors[key][0], linestyle = 'dashed', color = 'darkblue')
-            ax.axvline(x = priors[key][1], linestyle = 'dashed', color = 'darkblue')
-            ax.axvline(x = priors[key][2], linestyle = 'dashdot', color = 'darkblue')
+            ax.plot([priors[key][0], priors[key][2], priors[key][1]], [0, 2/(priors[key][1] - priors[key][0]), 0], '--', color = 'darkblue', lw = 1.6)
         else:
             pdf_values = np.exp(priors[key].log_prob(x))
             ax.plot(x, pdf_values, '--', lw = 1.6, color = 'darkblue')
