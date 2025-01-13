@@ -54,7 +54,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     alpha_z = numpyro.sample("alpha_z",dist.Normal(0,4))
     high_alpha_z = numpyro.sample("high_alpha_z", dist.Normal(0,4))
-    log_width_alpha_z = numpyro.sample("log_width_alpha_z", dist.Uniform(-1, 1))
+    log_width_alpha_z = numpyro.sample("log_width_alpha_z", dist.Uniform(-1, 3))
     # logit_width_alpha_z = numpyro.sample("logit_log_width_alpha_z",dist.Normal(0,logit_std))
     # log_width_alpha_z,jac_log_width_alpha_z = get_value_from_logit(logit_width_alpha_z,-1. ,1.)
     # numpyro.deterministic("log_width_alpha_z",log_width_alpha_z)
@@ -68,7 +68,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     
     beta_z = numpyro.sample("beta_z",dist.Uniform(0,10))
     high_beta_z = numpyro.sample("high_beta_z", dist.Uniform(0,10))
-    log_width_beta_z = numpyro.sample("log_width_beta_z", dist.Uniform(-1, 1))
+    log_width_beta_z = numpyro.sample("log_width_beta_z", dist.Uniform(-1, 3))
     # logit_width_beta_z = numpyro.sample("logit_log_width_beta_z",dist.Normal(0,logit_std))
     # log_width_beta_z,jac_log_width_beta_z = get_value_from_logit(logit_width_beta_z,-1. ,1.)
     # numpyro.deterministic("log_width_beta_z",log_width_beta_z)
@@ -82,7 +82,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
 
     low_zp = numpyro.sample("low_zp", dist.Uniform(0.2, 4)) 
     high_zp = numpyro.sample("high_zp", dist.Uniform(0.2, 4))
-    log_width_zp = numpyro.sample("log_width_zp", dist.Uniform(-1, 1))
+    log_width_zp = numpyro.sample("log_width_zp", dist.Uniform(-1, 3))
     # logit_width_zp = numpyro.sample("logit_log_width_zp",dist.Normal(0,logit_std))
     # log_width_zp,jac_log_width_zp = get_value_from_logit(logit_width_zp,-1. ,1.)
     # numpyro.deterministic("log_width_zp",log_width_zp)

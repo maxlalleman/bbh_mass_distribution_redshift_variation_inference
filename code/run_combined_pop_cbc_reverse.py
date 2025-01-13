@@ -20,7 +20,9 @@ injectionDict = getInjections(reweight=False)
 sampleDict = getSamples(sample_limit=2000,reweight=False)
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(combined_pop_gwb_cbc_redshift_mass) # , dense_mass =[("alpha_z", "high_alpha_z", "log_width_alpha_z", "logit_middle_m_alpha_z",
+kernel = NUTS(combined_pop_gwb_cbc_redshift_mass, 
+        target_accept_prob = 0.95
+        ) # , dense_mass =[("alpha_z", "high_alpha_z", "log_width_alpha_z", "logit_middle_m_alpha_z",
                          # "beta_z", "high_beta_z", "log_width_beta_z", "logit_middle_m_beta_z",
                          # "low_zp", "high_zp", "log_width_zp", "logit_middle_m_zp")]) #, target_accept_prob=0.95)
 #Try to increase warmup stage steps to avoid divergences later on
@@ -34,6 +36,6 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-save_path = "../data/RUNS/my_reverse_sector_logit_for_middle_z_until_75_from_20_seed_110.cdf"
+save_path = "../data/RUNS/my_reverse_sector_logit_for_middle_z_until_75_from_20_seed_110_width_prior_large_acc_prob_095.cdf"
 az.to_netcdf(data, save_path)
 
