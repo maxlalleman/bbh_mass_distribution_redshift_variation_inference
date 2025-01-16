@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Download and unzip
-curl https://sandbox.zenodo.org/record/14671139/files/redshift_evolution_CBC_O3.zip --output "redshift_evolution_O3.zip"
+curl https://zenodo.org/records/14671139/redshift_evolution_CBC_O3.zip --output "redshift_evolution_O3.zip"
 unzip redshift_evolution_O3.zip
 
 # Move input data to ../input/
