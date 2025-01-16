@@ -121,7 +121,7 @@ def getInjections(sample_limit=10000,reweight=False,weighting_function=reweighti
         Dictionary containing found injections
     """
 
-    injectionFile = "/home/max.lalleman/CBC_Stoch_Search/gwbcbcmodeling/gwbcbcmodeling/code/injectionDict_FAR_1_in_1.pickle"
+    injectionFile = "../input/injectionDict_FAR_1_in_1.pickle"
     injectionDict = np.load(injectionFile,allow_pickle=True)
 
     for key in injectionDict:
@@ -179,7 +179,7 @@ def getSamples(sample_limit=1000,bbh_only=True,reweight=True,weighting_function=
     """
 
     # Dicts with samples:
-    sampleDict = np.load("/home/max.lalleman/CBC_Stoch_Search/gwbcbcmodeling/gwbcbcmodeling/code/sampleDict_FAR_1_in_1_yr.pickle",allow_pickle=True)
+    sampleDict = np.load("../input/sampleDict_FAR_1_in_1_yr.pickle",allow_pickle=True)
 
     non_bbh = ['GW170817','S190425z','S190426c','S190814bv','S190917u','S200105ae','S200115j']
     if bbh_only:
@@ -216,7 +216,6 @@ def getSamples(sample_limit=1000,bbh_only=True,reweight=True,weighting_function=
             draw_weights = np.ones(sampleDict[event]['m1'].size)/sampleDict[event]['m1'].size
 
         sampleDict[event]['downselection_Neff'] = np.sum(draw_weights)**2/np.sum(draw_weights**2)
-        #print(event,np.sum(draw_weights)**2/np.sum(draw_weights**2))
 
         inds_to_keep = np.random.choice(np.arange(sampleDict[event]['m1'].size),size=sample_limit,replace=True,p=draw_weights)
         for key in sampleDict[event].keys():

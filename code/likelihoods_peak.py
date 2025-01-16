@@ -29,15 +29,27 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     """
     
     # Sample our hyperparameters
-    # alpha: Power-law index on primary mass distribution
+    # alpha_ref: Power-law index on primary mass distribution
     # mu_m1: Location of gaussian peak in primary mass distribution
+    # high_mu: high-redshift peak location
+    # log_width_mu: logarithm of the width in the sigmoid for variation of mu
+    # middle_z_mu: middle point of sigmoid variation of mu
     # sig_m1: Width of gaussian peak
+    # high_sig: high-redshift peak width
+    # log_width_sig: logarithm of the width in the sigmoid for variation of sig
+    # middle_z_sig: middle point of sigmoid variation of sig
     # f_peak: Fraction of events comprising gaussian peak
+    # high_f_peak: high-redshift fraction
+    # log_width_f_peak: logarithm of the width in the sigmoid for variation of f_peak
+    # middle_z_f_peak: middle point of sigmoid variation of f_peak
     # mMax: Location at which BBH mass distribution tapers off
     # mMin: Lower boundary at which BBH mass distribution tapers off
     # dmMax: Taper width above maximum mass
     # dmMin: Taper width below minimum mass
     # bq: Power-law index on the conditional secondary mass distribution p(m2|m1)
+    # alpha_z: ascending power-law index of differential merger rate
+    # beta_z: descending power-law index of differential merger rate
+    # zp: peak redshift of differential merger rate
     # mu: Mean of the chi-effective distribution
     # logsig_chi: Log10 of the chi-effective distribution's standard deviation
 
@@ -48,8 +60,7 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     high_mu = numpyro.sample("high_mu",dist.Uniform(15,60))
     log_width_mu = numpyro.sample("log_width_mu", dist.Uniform(-1, 1))
     width_mu = numpyro.deterministic("width_mu", 10.**log_width_mu)
-    middle_z_mu = numpyro.sample("middle_z_mu", dist.Uniform(0,0.8)) # used to be 0 to 4, change on 6/9/2024 before running anything,
-    # same for all other middle_z
+    middle_z_mu = numpyro.sample("middle_z_mu", dist.Uniform(0,0.8))
     
     mMin = numpyro.sample("mMin",dist.Uniform(5,15))
 
@@ -69,17 +80,17 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     high_sig = numpyro.sample("high_sig", dist.Uniform(1.5, 15))
     log_width_sig = numpyro.sample("log_width_sig", dist.Uniform(-1, 1))
     width_sig = numpyro.deterministic("width_sig", 10.**log_width_sig)
-    middle_z_sig = numpyro.sample("middle_z_sig", dist.Uniform(0,0.8)) # was 4
+    middle_z_sig = numpyro.sample("middle_z_sig", dist.Uniform(0,0.8))
 
     logit_log_f_peak = numpyro.sample("logit_log_f_peak",dist.Normal(0,logit_std))
-    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-6. ,0.) # changed from -5 to -6
+    log_f_peak,jac_log_f_peak = get_value_from_logit(logit_log_f_peak,-6. ,0.)
     numpyro.deterministic("log_f_peak",log_f_peak)
     numpyro.factor("p_log_f_peak",logit_log_f_peak**2/(2.*logit_std**2)-jnp.log(jac_log_f_peak))
     
     log_high_f_peak = numpyro.sample("log_high_f_peak", dist.Uniform(-6, 0))
     log_width_f_peak = numpyro.sample("log_width_f_peak", dist.Uniform(-1, 1))
     width_f_peak = numpyro.deterministic("width_f_peak", 10.**log_width_f_peak)
-    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,0.8)) # was 4
+    middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,0.8))
 
     logit_mMax = numpyro.sample("logit_mMax",dist.Normal(0,logit_std))
     mMax,jac_mMax = get_value_from_logit(logit_mMax,50. ,100.)

@@ -29,15 +29,36 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     """
     
     # Sample our hyperparameters
-    # alpha: Power-law index on primary mass distribution
+    # alpha_ref: Power-law index on primary mass distribution
+    # high_alpha: high-redshift power-law index
+    # log_width_alpha: logarithm of the width in the sigmoid for variation of alpha_ref
+    # middle_z_alpha: middle point of sigmoid variation of alpha_ref
     # mu_m1: Location of gaussian peak in primary mass distribution
     # sig_m1: Width of gaussian peak
     # f_peak: Fraction of events comprising gaussian peak
+    # high_f_peak: high-redshift fraction
+    # log_width_f_peak: logarithm of the width in the sigmoid for variation of f_peak
+    # middle_z_f_peak: middle point of sigmoid variation of f_peak
     # mMax: Location at which BBH mass distribution tapers off
+    # high_mMax: high-redshift high boundary of tapering 
+    # log_width_mMax: logarithm of the width in the sigmoid for variation of mMax
+    # middle_z_mMax: middle point of sigmoid variation of mMax
     # mMin: Lower boundary at which BBH mass distribution tapers off
+    # high_mMin: high-redshift low boundary of tapering 
+    # log_width_mMin: logarithm of the width in the sigmoid for variation of mMin
+    # middle_z_mMin: middle point of sigmoid variation of mMin
     # dmMax: Taper width above maximum mass
+    # high_dmMax: high-redshift high boundary width of tapering
+    # log_width_dmMax: logarithm of the width in the sigmoid for variation of dmMax
+    # middle_z_dmMax: middle point of sigmoid variation of dmMax
     # dmMin: Taper width below minimum mass
+    # high_dmMin: high-redshift low boundary width of tapering
+    # log_width_dmMin: logarithm of the width in the sigmoid for variation of dmMin
+    # middle_z_dmMin: middle point of sigmoid variation of dmMin
     # bq: Power-law index on the conditional secondary mass distribution p(m2|m1)
+    # alpha_z: ascending power-law index of differential merger rate
+    # beta_z: descending power-law index of differential merger rate
+    # zp: peak redshift of differential merger rate
     # mu: Mean of the chi-effective distribution
     # logsig_chi: Log10 of the chi-effective distribution's standard deviation
 
@@ -52,7 +73,6 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     mMin = numpyro.sample("mMin",dist.Uniform(5,15))
     
     high_mMin = numpyro.sample("high_mMin", dist.Uniform(5,15))
-    # delta_mMax = numpyro.sample("delta_mMax", dist.Normal(0, 5))
     log_width_mMin = numpyro.sample("log_width_mMin", dist.Uniform(-1, 1))
     width_mMin = numpyro.deterministic("width_mMin", 10.**log_width_mMin)
     middle_z_mMin = numpyro.sample("middle_z_mMin", dist.Uniform(0,0.8))
@@ -85,19 +105,16 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     width_f_peak = numpyro.deterministic("width_f_peak", 10.**log_width_f_peak)
     middle_z_f_peak = numpyro.sample("middle_z_f_peak", dist.Uniform(0,0.8))
 
-    # mMax = numpyro.sample("mMax",TransformedUniform(50.,100.))
     logit_mMax = numpyro.sample("logit_mMax",dist.Normal(0,logit_std))
     mMax,jac_mMax = get_value_from_logit(logit_mMax,50. ,100.)
     numpyro.deterministic("mMax",mMax)
     numpyro.factor("p_mMax",logit_mMax**2/(2.*logit_std**2)-jnp.log(jac_mMax))
 
     high_mMax = numpyro.sample("high_mMax", dist.Uniform(50,100))
-    # delta_mMax = numpyro.sample("delta_mMax", dist.Normal(0, 5))
     log_width_mMax = numpyro.sample("log_width_mMax", dist.Uniform(-1, 1))
     width_mMax = numpyro.deterministic("width_mMax", 10.**log_width_mMax)
     middle_z_mMax = numpyro.sample("middle_z_mMax", dist.Uniform(0,0.8))
 
-    # log_dmMin = numpyro.sample("log_dmMin",TransformedUniform(-1.,0.5))
     logit_log_dmMin = numpyro.sample("logit_log_dmMin",dist.Normal(0,logit_std))
     log_dmMin,jac_log_dmMin = get_value_from_logit(logit_log_dmMin, -1. ,0.5)
     numpyro.deterministic("log_dmMin",log_dmMin)
@@ -108,7 +125,6 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     width_dmMin = numpyro.deterministic("width_dmMin", 10.**log_width_dmMin)
     middle_z_dmMin = numpyro.sample("middle_z_dmMin", dist.Uniform(0, 0.8))
 
-    # log_dmMax = numpyro.sample("log_dmMax",TransformedUniform(0.5,1.5))
     logit_log_dmMax = numpyro.sample("logit_log_dmMax",dist.Normal(0,logit_std))
     log_dmMax,jac_log_dmMax = get_value_from_logit(logit_log_dmMax,0.5 ,1.5)
     numpyro.deterministic("log_dmMax",log_dmMax)
@@ -119,19 +135,16 @@ def combined_pop_gwb_cbc_redshift_mass(sampleDict,injectionDict):
     width_dmMax = numpyro.deterministic("width_dmMax", 10.**log_width_dmMax)
     middle_z_dmMax = numpyro.sample("middle_z_dmMax", dist.Uniform(0, 0.8))
 
-    # mu_chi = numpyro.sample("mu_chi",TransformedUniform(0.,1.))
     logit_mu_chi = numpyro.sample("logit_mu_chi",dist.Normal(0,logit_std))
     mu_chi,jac_mu_chi = get_value_from_logit(logit_mu_chi,0. ,1.)
     numpyro.deterministic("mu_chi",mu_chi)
     numpyro.factor("p_mu_chi",logit_mu_chi**2/(2.*logit_std**2)-jnp.log(jac_mu_chi))
 
-    # logsig_chi = numpyro.sample("logsig_chi",TransformedUniform(-1.,0.))
     logit_logsig_chi = numpyro.sample("logit_logsig_chi",dist.Normal(0,logit_std))
     logsig_chi,jac_logsig_chi = get_value_from_logit(logit_logsig_chi,-1. ,0.)
     numpyro.deterministic("logsig_chi",logsig_chi)
     numpyro.factor("p_logsig_chi",logit_logsig_chi**2/(2.*logit_std**2)-jnp.log(jac_logsig_chi))
 
-    # sig_cost = numpyro.sample("sig_cost",TransformedUniform(0.3,2.))
     logit_sig_cost = numpyro.sample("logit_sig_cost",dist.Normal(0,logit_std))
     sig_cost,jac_sig_cost = get_value_from_logit(logit_sig_cost,0.3 ,2.)
     numpyro.deterministic("sig_cost",sig_cost)

@@ -31,5 +31,5 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-save_path = "../data/RUNS/peak_run_no_delta_middle_z_until_0dot08.cdf"
+save_path = "../data/peak_analysis.cdf"
 az.to_netcdf(data, save_path)

@@ -8,7 +8,7 @@ In this paper, we infer the variation in redshift of the binary black hole mass 
 We consider the GW events from LIGO-Virgo-KAGRA's third observing run. We discuss the variation in redshift of the mass distribution in three different sectors.
 The peak sector, containing all parameters relevant to the peak part of the mass distribution, the power-law sector where the parameters of the power-law sector are varied, and the third sector, where we flip the dependencies and vary the redshift dependent part of the merger rate with mass where we also find no variation.
 
-The data can be downloaded from Zenodo . A pre-print of the paper can be found .
+The data can be downloaded from Zenodo [here](https://zenodo.org/records/14671139). A pre-print of the paper can be found .
 
 ## Getting started
 
@@ -21,6 +21,6 @@ the environment, simply call `conda activate gpu_env`.
 The repository contains several folders, each with a specific purpose:
 
 - **code**: Contains the code to run the analysis which produced the results in this paper.
-- **data**: Contains the script to download from Zenodo , the data used in this paper, as well as the results produced in this paper.
+- **data**: Contains the script to download from Zenodo [here](https://zenodo.org/records/14671139), the data used in this paper, as well as the results produced in this paper.
 - **figures**: Contains several notebooks to reproduce the figures of the paper. Note that all the data should have been downloaded
-    from Zenodo in order to run the notebooks in this folder.
+    from Zenodo [here](https://zenodo.org/records/14671139) in order to run the notebooks in this folder.

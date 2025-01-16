@@ -20,8 +20,7 @@ injectionDict = getInjections(reweight=False)
 sampleDict = getSamples(sample_limit=2000,reweight=False)
 
 # Set up NUTS sampler over our likelihood
-kernel = NUTS(combined_pop_gwb_cbc_redshift_mass) #, target_accept_prob=0.95)
-#Try to increase warmup stage steps to avoid divergences later on
+kernel = NUTS(combined_pop_gwb_cbc_redshift_mass)
 mcmc = MCMC(kernel,num_warmup=2000,num_samples=3000,num_chains=1)
 
 # Choose a random key and run over our model
@@ -32,6 +31,6 @@ mcmc.print_summary()
 
 # Save out data
 data = az.from_numpyro(mcmc)
-save_path = "../data/RUNS/power_law_only_high_sigmoids.cdf"
+save_path = "../data/power_law_analysis.cdf"
 az.to_netcdf(data, save_path)
 

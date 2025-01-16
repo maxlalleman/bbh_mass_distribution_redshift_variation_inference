@@ -1,7 +1,6 @@
-# data
+# Data directory
 
-In this folder, you can find the notebooks in which all the figures are made for the corresponding paper, see here.
-
-Per sector of the analysis, one notebook can be found in which all relevant figures, not all in the paper itself, are made.
-Firstly, they show the computer parameter estimation cornerplots. Then, they look at the variation in the samples of all parameters as a function of redshift/mass.
-After that, they compute the merger rate and the primary mass distribution for different redshift.
+The data used in the analysis, as well as the obtained results can be downloaded from Zenodo [here](https://zenodo.org/records/14671139). An script that
+downloads the data in this subdirectory is also provided: `download_data_from_zenodo.sh`. Running this script will download
+all the data and results from Zenodo. Note that these results are needed to be able to reproduce the figures of the paper, as 
+explained in the `/figures` subdirectory of the repository.
